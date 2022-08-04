@@ -2,7 +2,7 @@ class Link {
     constructor(bodyA, bodyB){
         var lastLink = bodyA.body.bodies.length-2;
         this.link = Constraint.create({
-            bodyA:bodyA.body.bodies[lastLink],
+            bodyA: bodyA.body.bodies[lastLink],
             pointA: {x: 0, y: 0},
             bodyB: bodyB,
             pointB: {x: 0, y: 0},
@@ -10,5 +10,9 @@ class Link {
             stiffness: 0.01
         })
         World.add(engine.world, this.link);
+    }
+
+    cortar(){
+        World.remove(engine.world, this.link);
     }
 }
