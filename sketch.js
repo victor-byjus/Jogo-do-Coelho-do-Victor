@@ -18,6 +18,9 @@ var fruit_con;
 var imagemFundo, comida, coelho;
 var spriteCoelho;
 var button;
+var piscando;
+var comendo;
+var triste;
 
 //Função para carregar os arquivos
 function preload(){
@@ -25,6 +28,16 @@ function preload(){
   imagemFundo = loadImage("background.png");
   comida = loadImage("cenoura.png");
   coelho = loadImage("Rabbit-01.png");
+  //Carregando animações
+  piscando = loadAnimation("blink_1.png","blink_2.png","blink_3.png");
+  comendo = loadAnimation("eat_0.png","eat_1.png","eat_2.png", "eat_3.png", "eat_4.png");
+  triste = loadAnimation("sad_1.png","sad_2.png","sad_3.png");
+  //Configurações das animações
+  piscando.playing = true;
+  comendo.playing = true;
+  triste.playing = true;
+  comendo.looping = false;
+  triste.looping = false;
 }
 
 //Função para configurações
@@ -39,6 +52,10 @@ function setup()
   rectMode(CENTER);
   ellipseMode(RADIUS);
   imageMode(CENTER);
+
+  //Velocidade das animações
+  piscando.frameDelay = 15;
+  comendo.frameDelay = 15;
 
   //Criando o chão
   ground = new Ground(200, 690, 600, 20);
@@ -57,11 +74,17 @@ function setup()
   fruit_con = new Link(rope, fruit);
 
   //Criando o sprite do coelho
-  spriteCoelho = createSprite(250,650,100,100);
+  spriteCoelho = createSprite(250,630,100,100);
   //Adicionando imagem ao sprite do coelho
   spriteCoelho.addImage(coelho);
   //Ajustando a escala (tamanho) do coelho
   spriteCoelho.scale = 0.2;
+  //Adicionar as animações do coelho
+  spriteCoelho.addAnimation("piscando", piscando);
+  spriteCoelho.addAnimation("comendo", comendo);
+  spriteCoelho.addAnimation("triste", triste);
+  //Mudar para a animação piscando
+  spriteCoelho.changeAnimation("piscando");
 
   //Criando a imagem para ser o botão
   button = createImg("cut_button.png");
@@ -88,8 +111,21 @@ function draw()
   rope.show();
 
   //Coloca a imagem da cenoura
-  image(comida, fruit.position.x, fruit.position.y, 50, 80);
+  if(fruit !== null){
+    image(comida, fruit.position.x, fruit.position.y, 50, 80);
+  }
 
+  //Se a cenoura colidiu com o coelho, ele vai comer
+  if(verColisao(fruit, spriteCoelho) === true){
+    spriteCoelho.changeAnimation("comendo");
+  }
+
+  //Se a cenoura colidiu com o chão, ele vai ficar triste
+  if(fruit !== null && fruit.position.y >= 650){
+    spriteCoelho.changeAnimation("triste");
+    fruit = null;
+  }
+  
   //Desenha todos os sprites
   drawSprites();
 }
@@ -103,7 +139,26 @@ function derrubarComida(){
   fruit_con = null;
 }
 
-
-
+//Função para ver a colisão da cenoura com o coelho
+function verColisao(cenoura, coelho){
+  //Se a cenoura existe
+  if(cenoura !== null){
+    //Calcula a distância entre a cenoura e o coelho
+    var distancia = dist(cenoura.position.x, cenoura.position.y, 
+                         coelho.position.x, coelho.position.y);
+    //Se a distância for menor ou igual a 80
+    if(distancia <= 80){
+      //Apaga a cenoura
+      World.remove(engine.world, fruit);
+      fruit = null;
+      //Retorna um valor verdadeiro
+      return true;
+      //Senão
+    } else {
+      //Retorna um valor falso
+      return false
+    }
+  }
+}
 
 
