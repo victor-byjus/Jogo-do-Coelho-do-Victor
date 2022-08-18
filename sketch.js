@@ -21,6 +21,13 @@ var button;
 var piscando;
 var comendo;
 var triste;
+var musica;
+var corta;
+var chorando;
+var alimentando;
+var ar;
+var balao;
+var mute;
 
 //Função para carregar os arquivos
 function preload(){
@@ -38,6 +45,12 @@ function preload(){
   triste.playing = true;
   comendo.looping = false;
   triste.looping = false;
+  //Carregando os sons
+  musica = loadSound("sound1.mp3");
+  corta = loadSound("rope_cut.mp3");
+  chorando = loadSound("sad.wav");
+  alimentando = loadSound("eating_sound.mp3");
+  ar = loadSound("air.wav");
 }
 
 //Função para configurações
@@ -45,9 +58,16 @@ function setup()
 {
   //Criando a tela
   createCanvas(500,700);
+
+  //Colocando a música para tocar
+  musica.play();
+  //Ajustando o volume
+  musica.setVolume(0.5);
+
   //Configuração da biblioteca Matter
   engine = Engine.create();
   world = engine.world;
+
   //Configuração de posição dos elementos
   rectMode(CENTER);
   ellipseMode(RADIUS);
@@ -74,7 +94,7 @@ function setup()
   fruit_con = new Link(rope, fruit);
 
   //Criando o sprite do coelho
-  spriteCoelho = createSprite(250,630,100,100);
+  spriteCoelho = createSprite(420,630,100,100);
   //Adicionando imagem ao sprite do coelho
   spriteCoelho.addImage(coelho);
   //Ajustando a escala (tamanho) do coelho
@@ -94,6 +114,24 @@ function setup()
   button.size(50,50);
   //Quando o botão é clicado, chama a função
   button.mouseClicked(derrubarComida);
+
+  //Criando a imagem para ser o botão
+  balao = createImg("balloon.png");
+  //Definindo a posição do botão
+  balao.position(10,230);
+  //Definindo o tamanho do botão
+  balao.size(150,100);
+  //Quando o botão é clicado, chama a função
+  balao.mouseClicked(soprando);
+
+  //Criando a imagem para ser o botão
+  mute = createImg("mute.png");
+  //Definindo a posição do botão
+  mute.position(450,20);
+  //Definindo o tamanho do botão
+  mute.size(50,50);
+  //Quando o botão é clicado, chama a função
+  mute.mouseClicked(mutando);
 }
 
 //Função de desenho
@@ -118,12 +156,17 @@ function draw()
   //Se a cenoura colidiu com o coelho, ele vai comer
   if(verColisao(fruit, spriteCoelho) === true){
     spriteCoelho.changeAnimation("comendo");
+    //Toca o som do coelho comendo
+    alimentando.play();
   }
 
   //Se a cenoura colidiu com o chão, ele vai ficar triste
   if(fruit !== null && fruit.position.y >= 650){
     spriteCoelho.changeAnimation("triste");
     fruit = null;
+    //Toca o som do coelho triste e para a musica
+    musica.stop();
+    chorando.play();
   }
   
   //Desenha todos os sprites
@@ -132,6 +175,8 @@ function draw()
 
 //Função para derrubar a comida
 function derrubarComida(){
+  //Toca o som da corda cortada
+  corta.play();
   //Quebra a corda
   rope.break();
   //Corta a ligação entre a cenoura e a corda
@@ -144,7 +189,7 @@ function verColisao(cenoura, coelho){
   //Se a cenoura existe
   if(cenoura !== null){
     //Calcula a distância entre a cenoura e o coelho
-    var distancia = dist(cenoura.position.x, cenoura.position.y, 
+    var distancia = dist(cenoura.position.x, cenoura.position.y,
                          coelho.position.x, coelho.position.y);
     //Se a distância for menor ou igual a 80
     if(distancia <= 80){
@@ -156,9 +201,28 @@ function verColisao(cenoura, coelho){
       //Senão
     } else {
       //Retorna um valor falso
-      return false
+      return false;
     }
   }
 }
 
+//Função para soprar a fruta
+function soprando(){
+  //aplica uma força na fruta para a direita
+  Matter.Body.applyForce(fruit, {x: 0, y: 0}, {x: 0.01, y: 0});
+  //Comando para tocar o som de ar
+  ar.play();
+}
 
+//Função para mutar a música
+function mutando(){
+  //Se a música estiver tocando
+  if(musica.isPlaying()){
+    //Para a música
+    musica.stop();
+    //Senão
+  } else {
+    //Toca a música
+    musica.play();
+  }
+}
